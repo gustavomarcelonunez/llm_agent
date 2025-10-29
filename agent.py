@@ -10,18 +10,18 @@ api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 
 def suggestion_agent(tema):
-    prompt1 = f"Con el siguiente tema {tema}, sugiere al usuario una lista de cinco sitios web para buscar información sobre eso. Debes asegurarte que las páginas existan, y que se puedan acceder y que contengan la información solicitada."
+    prompt = f"Con el siguiente tema {tema}, sugiere al usuario una lista de cinco sitios web para buscar información sobre eso. Debes asegurarte que las páginas existan, y que se puedan acceder y que contengan la información solicitada."
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "Eres un asistente que sugiere sitios web para buscar información relacionada al tema. Solo devuelve una lista de URLs"},
-            {"role": "user", "content": prompt1}
+            {"role": "user", "content": prompt}
         ]
     )
     return response.choices[0].message.content
 
 def parsing_agent(sugerencia):
-    prompt1 = f"Convierte la siguiente cadena {sugerencia}, en un dict para python."
+    prompt = f"Convierte la siguiente cadena {sugerencia}, en un dict para python."
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -30,7 +30,7 @@ def parsing_agent(sugerencia):
                                            "Usa comillas simples para las claves y los valores string. Las claves son siempre strings numéricas o de texto. "
                                            "Los valores pueden ser strings, números o listas. Entrega solo el diccionario en formato Python sin explicaciones ni texto adicional. "
                                            "Formatea el resultado para que pueda ser usado directamente por ast.literal_eval() en Python.")},
-            {"role": "user", "content": prompt1}
+            {"role": "user", "content": prompt}
         ]
     )
     return response.choices[0].message.content
