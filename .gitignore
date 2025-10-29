@@ -1,0 +1,21 @@
+# --- Archivos de entorno ---
+.env
+
+# --- Entorno virtual ---
+venv/
+.env/
+.venv/
+
+# --- Archivos compilados de Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Archivos de configuración del sistema ---
+.DS_Store
+Thumbs.db
+
+# --- Archivos temporales o logs ---
+*.log
+*.tmp
