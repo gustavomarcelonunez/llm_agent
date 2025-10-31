@@ -10,7 +10,7 @@ def search_in(url):
                     "Chrome/117.0.0.0 Safari/537.36"
     }
     r = requests.get(url, headers=headers)
-    print(r.status_code)
+    print("Status code: " . r.status_code)
     if r.status_code != 200:
         return "No se encontró información."
     

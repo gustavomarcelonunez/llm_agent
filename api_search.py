@@ -1,5 +1,6 @@
 # api_search.py
 import requests
+import time
 
 def search_obis(keyword):
     """
@@ -7,23 +8,29 @@ def search_obis(keyword):
     según una palabra clave, usando su API pública.
     """
     base_url = "https://api.obis.org/v3/occurrence"
-    params = {"scientificname": keyword, "size": 5}  # 5 primeros resultados
+    max_records=500
+    size = 100  # cantidad por página
+    offset = 0
+    results = []
+    
+    while len(results) < max_records:
+        params = {"scientificname": keyword, "size": size, "offset": offset}
+        r = requests.get(base_url, params=params, timeout=10)
+        if r.status_code != 200:
+            print(f"Error en la solicitud (HTTP {r.status_code})")
+            break
 
-    r = requests.get(base_url, params=params)
-    if r.status_code != 200:
-        return f"⚠️ No se pudo acceder a OBIS (status {r.status_code})"
+        data = r.json()
+        page_results = data.get("results", [])
+        if not page_results:
+            break
 
-    data = r.json()
+        results.extend(page_results)
+        offset += size
+        time.sleep(0.3)  # evita abusar de la API
 
-    if not data.get("results"):
-        return f"No se encontraron registros para '{keyword}'."
+        if len(page_results) < size:
+            break  # última página
 
-    print(f"\n🔍 Resultados encontrados en OBIS para '{keyword}':\n")
-    for i, result in enumerate(data["results"], start=1):
-        especie = result.get("scientificName", "Sin nombre")
-        lat = result.get("decimalLatitude", "?")
-        lon = result.get("decimalLongitude", "?")
-        fecha = result.get("eventDate", "Desconocida")
-        print(f"{i}. {especie} — 📍({lat}, {lon}) — 🗓 {fecha}")
-
-    return "✅ Consulta finalizada."
+    print(f"✅ Recuperados {len(results)} registros de OBIS.")
+    return results

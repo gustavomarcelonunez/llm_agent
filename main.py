@@ -1,9 +1,5 @@
-import json
-
-from semantic_agent import semantic_query
-from api_discovery_agent import discover_api
-from web_validation import url_funciona
-from web_search import search_in
+from api_search import search_obis
+from reasoning_agent import summarize_obis_data
 
 def mostrar_resultados(lista):
 
@@ -18,47 +14,14 @@ def mostrar_resultados(lista):
 
 if __name__ == "__main__":
     topic = input("Tema de búsqueda: ")
-    semantic_results = semantic_query(topic)
-    mostrar_resultados(semantic_results)
 
-    opcion = int(input("👉 Elegí el número del portal: ")) - 1
-    portal = semantic_results[opcion]
-
-   
-
-    nombre, url = portal["nombre"], portal["url"]
-
-
-    print("Analizando sitio web...")
-
-    if url_funciona(portal["url"]):
-
-        print(f"\n🔎 Analizando el portal {nombre} para descubrir si tiene API...")
-        api_info = discover_api(url)
-        print(api_info)
+    occurrences = search_obis(topic)
+    # opcion = int(input("👉 Elegí el número del portal: ")) - 1
     
-        try:
-            api_info = json.loads(api_info)
-        except:
-            print("⚠️ No se pudo interpretar la respuesta del agente. Se usará scraping.")
-            resultado = search_in(url)
-        else:
-            if api_info.get("tiene_api"):
-                print(f"🌐 API detectada ({api_info['tipo']}): {api_info['url_api']}")
-                # Ejemplo: si reconoce OBIS
-        #        if "obis" in api_info["url_api"].lower():
-        #            resultado = search_obis(topic)
-        #        else:
-        #            resultado = f"El portal tiene API, pero no hay conector implementado aún. {api_info}"
-            else:
-                print("⚠️ No se detectó API pública. Usando scraping...")
-                resultado = search_in(url)
 
-        print("\n----- RESULTADO FINAL -----\n")
-        print(resultado)
+    # print(f"\n🔎 Analizando el portal {nombre} para descubrir si tiene API...")
+    # resultado = search_in(url)
 
-    else:
-        print(f"❌ El sitio {url} no está disponible. Elegí otro portal.")
-        exit()
-
-
+    print("\n----- RESULTADO FINAL -----\n")
+    result = summarize_obis_data(occurrences, topic)
+    print(result)
