@@ -1,8 +1,7 @@
-# api_search.py
 import requests
 import time
 
-def search_obis(keyword):
+def obis_search(keyword):
     """
     Busca registros biológicos en OBIS (Ocean Biogeographic Information System)
     según una palabra clave, usando su API pública.
