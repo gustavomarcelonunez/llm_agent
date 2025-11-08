@@ -44,11 +44,11 @@ def summarize_obis_data(species_name, obis_data, worms_data):
         {worms_summary}
 
         Registros biogeográficos (OBIS):
-        {len(obis_data)} ocurrencias encontradas. A continuación se muestra los registros:
         {sample}
 
         Tu tarea:
         - Resume los patrones geográficos y ambientales más destacados (países, SST, SSS, profundidad).
+        - Menciona toda información relevante acerca de su taxonomía.
         - Comenta si los registros son coherentes con la distribución esperada según WoRMS.
         - Indica si hay posibles errores o inconsistencias.
         - Redacta en español, en no más de 20 líneas, con tono científico pero claro.

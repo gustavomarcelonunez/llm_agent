@@ -1,7 +1,7 @@
 import requests
 import time
 
-def verify_taxon_worms(scientific_name):
+def worms_search(scientific_name):
     """
     Verifica la validez taxonómica de una especie en WoRMS (World Register of Marine Species).
     Devuelve un diccionario con estado, nombre válido, autoridad, y sinónimos si existen.
