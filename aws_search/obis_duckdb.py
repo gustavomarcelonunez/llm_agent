@@ -46,10 +46,10 @@ def query_obis_dataset(dataset_id: str, species_name: str, limit_per_dataset: in
 # ----------------------------------------------------------
 # Función principal: busca en varios datasets (paralelizada)
 # ----------------------------------------------------------
-def search_obis_species_parallel(dataset_ids: List[str], species_name: str, limit_per_dataset: int = 200, sample_size: int = 15, max_workers: int = 8) -> pd.DataFrame:
+def search_obis_species_parallel(dataset_ids: List[str], species_name: str, limit_per_dataset: int = 200, sample_size: int = 20, max_workers: int = 10) -> pd.DataFrame:
     """
     Busca ocurrencias en múltiples datasets de OBIS en S3, en paralelo.
-    1️⃣ Toma una muestra de los datasets (por defecto 15)
+    1️⃣ Toma una muestra de los datasets (por defecto 20)
     2️⃣ Ejecuta consultas simultáneas a S3 (DuckDB + httpfs)
     3️⃣ Devuelve un DataFrame consolidado
 
@@ -60,8 +60,6 @@ def search_obis_species_parallel(dataset_ids: List[str], species_name: str, limi
         sample_size (int): número máximo de datasets a consultar
         max_workers (int): número de hilos paralelos
     """
-    print(f"🔎 Buscando ocurrencias de '{species_name}' en OBIS...")
-    print(f"📦 Total de datasets disponibles: {len(dataset_ids)}")
 
     # --- Sampling ---
     if len(dataset_ids) > sample_size:
