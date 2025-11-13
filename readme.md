@@ -69,25 +69,25 @@ outputs/ folder: a full integrated text file combining:
 
 ## 🧩 Main Components
 
-llm_agent/
-├── main.py                         # Entry point for the workflow
-├── agents/
-|   ├── reasoning_agent.py          # Final reasoning LLM
-│   ├── regional_agent_runner.py    # Multithread-agent runner
-│   ├── summarizer_agent.py         # Multi-agent summarization
-├── api_search/
-│   ├── obis_api.py                 # OBIS data retrieval and filtering
-│   ├── worms_api.py                # WoRMS API integration
-├── aws_search/
-│   ├── obis_duckdb.py              # Bucket S3 caller
-├── data/                           # MEOW shapefiles
-├── utils/
-│   ├── meow_ecoregions.py          # MEOW ecoregion spatial join
-│   ├── save_regional_summaries.py  # Merge final summarie text output with regional summarie
-│   ├── save_regional_summaries.py  # Combined text output
-├── requirements.txt
-├── .env (not committed)
-└── outputs/                        # Generated summaries
+    llm_agent/
+    ├── main.py                         # Entry point for the workflow
+    ├── agents/
+    |   ├── reasoning_agent.py          # Final reasoning LLM
+    │   ├── regional_agent_runner.py    # Multithread-agent runner
+    │   ├── summarizer_agent.py         # Multi-agent summarization
+    ├── api_search/
+    │   ├── obis_api.py                 # OBIS data retrieval and filtering
+    │   ├── worms_api.py                # WoRMS API integration
+    ├── aws_search/
+    │   ├── obis_duckdb.py              # Bucket S3 caller
+    ├── data/                           # MEOW shapefiles
+    ├── utils/
+    │   ├── meow_ecoregions.py          # MEOW ecoregion spatial join
+    │   ├── save_regional_summaries.py  # Merge final summarie text output with regional summarie
+    │   ├── save_regional_summaries.py  # Combined text output
+    ├── requirements.txt
+    ├── .env (not committed)
+    └── outputs/                        # Generated summaries
 
 ## 🧠 Architecture Overview
 
