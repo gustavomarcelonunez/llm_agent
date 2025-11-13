@@ -1,11 +1,12 @@
 from api_search.obis_api import obis_search
 from api_search.worms_api import worms_search
 from aws_search.obis_duckdb import search_obis_species_parallel
-from meow_ecoregions import assign_meow_ecoregion
-from agents.regional_agent_runner import run_regional_agents
+
+from utils.meow_ecoregions import assign_meow_ecoregion
 from utils.save_regional_summaries import save_regional_summaries
+from utils.save_final_summarie import append_global_summary_to_file
 
-
+from agents.regional_agent_runner import run_regional_agents
 from agents.reasoning_agent import summarize_obis_data
 from agents.summarizer_agent import summarize_with_llm
 
@@ -22,16 +23,21 @@ if __name__ == "__main__":
     df = search_obis_species_parallel(
         dataset_ids=datasets,
         species_name=scientific_name,
-        limit_per_dataset=200,
+        limit_per_dataset=2,
         sample_size=20,   # usa 20 datasets (ajustable)
-        max_workers=8     # 10 consultas paralelas
+        max_workers=8     # 8 consultas paralelas
     )
 
     # Modifica el DF y agrega una ecoregión, según coordenadas
     df_with_ecoregion = assign_meow_ecoregion(df)
 
     # Genera un resumen para cada ecoregión
-    resume = run_regional_agents(df_with_ecoregion, scientific_name, summarize_with_llm)
+    resume = run_regional_agents(
+        df_with_ecoregion,
+        scientific_name,
+        summarize_with_llm,
+        max_workers=8
+    )
    
     print("\n🔎 Verificando taxon en WoRMS...\n")
     taxon_info = worms_search(scientific_name) 
@@ -41,5 +47,9 @@ if __name__ == "__main__":
 
     print("\n----- RESULTADO FINAL -----\n")
     print("🧠 Pensando...\n")
+
+
     result = summarize_obis_data(scientific_name, txt_path)
+    append_global_summary_to_file(txt_path, result)
+
     print(result)

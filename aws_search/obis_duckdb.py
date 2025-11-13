@@ -46,7 +46,7 @@ def query_obis_dataset(dataset_id: str, species_name: str, limit_per_dataset: in
 # ----------------------------------------------------------
 # Función principal: busca en varios datasets (paralelizada)
 # ----------------------------------------------------------
-def search_obis_species_parallel(dataset_ids: List[str], species_name: str, limit_per_dataset: int = 200, sample_size: int = 20, max_workers: int = 10) -> pd.DataFrame:
+def search_obis_species_parallel(dataset_ids: List[str], species_name: str, limit_per_dataset: int, sample_size: int, max_workers: int) -> pd.DataFrame:
     """
     Busca ocurrencias en múltiples datasets de OBIS en S3, en paralelo.
     1️⃣ Toma una muestra de los datasets (por defecto 20)

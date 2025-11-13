@@ -6,7 +6,7 @@ from typing import Dict, Any
 # 🔹 Función principal
 # ==============================
 
-def run_regional_agents(df: pd.DataFrame, scientific_name: str, summarize_fn, max_workers: int = 8) -> Dict[str, Any]:
+def run_regional_agents(df: pd.DataFrame, scientific_name: str, summarize_fn, max_workers: int) -> Dict[str, Any]:
     """
     Ejecuta agentes regionales en paralelo.
     

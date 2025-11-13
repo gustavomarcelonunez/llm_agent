@@ -32,18 +32,16 @@ def summarize_with_llm(species_name: str, region_name: str, df_region: pd.DataFr
     # ==============================
     # 🔹 Preprocesamiento
     # ==============================
-    n_records = len(df_region)
-    if n_records == 0:
+    if len(df_region) == 0:
         return f"No hay registros para {species_name} en {region_name}."
 
-    # Limitamos tamaño para evitar exceso de tokens
-    sample = df_region.sample(min(100, n_records))  # máximo 100 filas
+    sample = df_region
     cols = ["country", "eventDate", "decimalLatitude", "decimalLongitude", "basisOfRecord"]
     sample = sample[cols].fillna("Unknown")
 
     # Convertimos a JSON comprimido
     data_json = sample.to_json(orient="records", force_ascii=False)
-    data_json = shorten(data_json, width=5000, placeholder="...")  # corta por seguridad
+    # data_json = shorten(data_json, width=5000, placeholder="...")  # corta por seguridad
 
     # ==============================
     # 🔹 Prompt

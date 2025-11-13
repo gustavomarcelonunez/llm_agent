@@ -1,7 +1,11 @@
 import os
 import json
 
-def save_regional_summaries(results: dict, species_name: str, worms_info: str = None, output_dir: str = "outputs") -> str:
+def save_regional_summaries(
+        results: dict,
+        species_name: str,
+        worms_info: str = None,
+        output_dir: str = "outputs") -> str:
     """
     Guarda los resúmenes regionales y la información de WoRMS en un archivo .txt.
 
@@ -23,7 +27,7 @@ def save_regional_summaries(results: dict, species_name: str, worms_info: str = 
     """
     os.makedirs(output_dir, exist_ok=True)
     safe_name = species_name.replace(" ", "_").lower()
-    output_path = os.path.join(output_dir, f"{safe_name}_regional_summaries.txt")
+    output_path = os.path.join(output_dir, f"{safe_name}_summarie.txt")
 
     with open(output_path, "w", encoding="utf-8") as f:
         # Encabezado
