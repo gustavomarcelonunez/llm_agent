@@ -17,6 +17,9 @@ if __name__ == "__main__":
     
     print("\n🔎 Buscando datasets en OBIS...\n")
     datasets = obis_search(scientific_name)
+
+    print("\n🔎 Verificando taxon en WoRMS...\n")
+    taxon_info = worms_search(scientific_name) 
     
     print("\n🔎 Obteniendo ocurrencias desde el bucket s3 de OBIS...\n")
     
@@ -38,9 +41,6 @@ if __name__ == "__main__":
         summarize_with_llm,
         max_workers=8
     )
-   
-    print("\n🔎 Verificando taxon en WoRMS...\n")
-    taxon_info = worms_search(scientific_name) 
 
     txt_path = save_regional_summaries(resume, scientific_name, taxon_info)
 
