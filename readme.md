@@ -3,8 +3,6 @@
 **Marine Species Reasoning Agent** is an experimental project that integrates marine biodiversity data from **OBIS** (Ocean Biodiversity Information System) with taxonomic validation from **WoRMS** (World Register of Marine Species).  
 It leverages **LLM-based agents** to process, validate, and summarize large occurrence datasets into scientifically meaningful insights.
 
----
-
 ## 🌊 Overview
 
 This tool automates the workflow of exploring marine species data by:
@@ -15,8 +13,6 @@ This tool automates the workflow of exploring marine species data by:
 5. Combining all results into a single integrated text report.
 
 The goal is to support marine research and environmental monitoring by enabling scalable, AI-driven reasoning over global biodiversity datasets.
-
----
 
 ## ⚙️ Installation
 
@@ -133,5 +129,3 @@ MIT License — Free for research and educational use.
 ## 📬 Contact
 Maintained by Gustavo Marcelo Nuñez
 For questions or collaborations: gnunez@cenpat-conicet.gob.ar, guscostaf@gmail.com
-
----
