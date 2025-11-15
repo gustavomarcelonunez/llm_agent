@@ -1,7 +1,6 @@
 import requests
-import time
 
-def obis_search(scientific_name):
+def obis_search(taxonid):
     """
     Busca registros biológicos en OBIS (Ocean Biogeographic Information System)
     según una palabra clave, usando su API pública.
@@ -15,7 +14,7 @@ def obis_search(scientific_name):
        
     while len(results) < max_records:
         params = {
-                    "scientificname": scientific_name,
+                    "taxonid": taxonid,
                     "size": size,
                     "offset": offset
                 }        
@@ -40,5 +39,5 @@ def obis_search(scientific_name):
         if len(page_results) < size:
             break  # última página
 
-    print(f"✅ Recuperados {len(results)} datasets de OBIS.")
+    print(f"✅ Recuperados {len(results)} de {total_datasets} datasets de OBIS.")
     return results

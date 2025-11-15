@@ -35,6 +35,7 @@ The goal is to support marine research and environmental monitoring by enabling 
     ```
 
 4. **Set your OpenAI API key**
+
     Create a .env file in the project root and add your key:
     ```bash
     OPENAI_API_KEY=your_api_key_here
@@ -127,5 +128,5 @@ outputs/ folder: a full integrated text file combining:
 MIT License — Free for research and educational use.
 
 ## 📬 Contact
-Maintained by Gustavo Marcelo Nuñez
+Maintained by Gustavo Marcelo Nuñez.
 For questions or collaborations: gnunez@cenpat-conicet.gob.ar, guscostaf@gmail.com

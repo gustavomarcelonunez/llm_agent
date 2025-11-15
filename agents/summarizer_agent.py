@@ -36,7 +36,7 @@ def summarize_with_llm(species_name: str, region_name: str, df_region: pd.DataFr
         return f"No hay registros para {species_name} en {region_name}."
 
     sample = df_region
-    cols = ["country", "eventDate", "decimalLatitude", "decimalLongitude", "basisOfRecord"]
+    cols = ["eventDate", "decimalLatitude", "decimalLongitude", "basisOfRecord"]
     sample = sample[cols].fillna("Unknown")
 
     # Convertimos a JSON comprimido
@@ -48,7 +48,7 @@ def summarize_with_llm(species_name: str, region_name: str, df_region: pd.DataFr
     # ==============================
     system_prompt = (
         "Eres un oceanógrafo especializado en distribución de especies marinas. "
-        "Tu tarea es analizar registros de ocurrencia de una especie en una ecoregión, "
+        "Tu tarea es analizar registros de ocurrencias de una especie en una ecoregión, "
         "identificando patrones geográficos, temporales y de esfuerzo de muestreo. "
         "Sé conciso y preciso, usando un lenguaje técnico claro."
     )
@@ -62,8 +62,7 @@ Registros (muestra):
 Por favor, entrega un resumen estructurado con los siguientes puntos:
 1. Rango geográfico (latitud y longitud aproximada).
 2. Distribución temporal (años o períodos predominantes).
-3. Países con mayor cantidad de registros.
-4. Tipo de registro más común (por ejemplo, 'HumanObservation', 'PreservedSpecimen', etc.).
+3. Tipo de registro más común (por ejemplo, 'HumanObservation', 'PreservedSpecimen', etc.).
 5. Cualquier observación sobre calidad o completitud de datos (por ejemplo, registros sin coordenadas).
 6. Una breve interpretación ecológica o biogeográfica (máx. 3 frases).
 """

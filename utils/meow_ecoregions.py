@@ -20,12 +20,10 @@ def assign_meow_ecoregion(df: pd.DataFrame) -> pd.DataFrame:
     gdf = gpd.GeoDataFrame(df_geo, geometry="geometry", crs="EPSG:4326")
 
     # Hacer spatial join
-    joined = gpd.sjoin(gdf, meow[["geometry", "ECOREGION", "PROVINCE", "REALM"]], how="left")
+    joined = gpd.sjoin(gdf, meow[["geometry", "ECOREGION"]], how="left")
 
     # Crear columna combinada jerárquica
     joined["ecoregion"] = (
-        joined["REALM"].fillna("Unknown") + " / " +
-        joined["PROVINCE"].fillna("Unknown") + " / " +
         joined["ECOREGION"].fillna("Unknown")
     )
 

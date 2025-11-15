@@ -10,25 +10,30 @@ from agents.regional_agent_runner import run_regional_agents
 from agents.reasoning_agent import summarize_obis_data
 from agents.summarizer_agent import summarize_with_llm
 
+LIMIT_PER_DATASET=500
+SAMPLE=20
+MAXWORKERS = 16
 
 if __name__ == "__main__":
 
     scientific_name = input("Ingrese nombre científico: ")
-    
-    print("\n🔎 Buscando datasets en OBIS...\n")
-    datasets = obis_search(scientific_name)
 
     print("\n🔎 Verificando taxon en WoRMS...\n")
-    taxon_info = worms_search(scientific_name) 
+    taxon_info = worms_search(scientific_name)
+
+    taxon_id = taxon_info["aphia_id"]
+    
+    print("\n🔎 Buscando datasets en OBIS...\n")
+    datasets = obis_search(taxon_id)
     
     print("\n🔎 Obteniendo ocurrencias desde el bucket s3 de OBIS...\n")
     
     df = search_obis_species_parallel(
         dataset_ids=datasets,
-        species_name=scientific_name,
-        limit_per_dataset=2,
-        sample_size=20,   # usa 20 datasets (ajustable)
-        max_workers=8     # 8 consultas paralelas
+        aphia_id=taxon_id,
+        limit_per_dataset=LIMIT_PER_DATASET,
+        sample_size=SAMPLE,
+        max_workers=MAXWORKERS
     )
 
     # Modifica el DF y agrega una ecoregión, según coordenadas
@@ -39,10 +44,13 @@ if __name__ == "__main__":
         df_with_ecoregion,
         scientific_name,
         summarize_with_llm,
-        max_workers=8
+        max_workers=MAXWORKERS
     )
-
-    txt_path = save_regional_summaries(resume, scientific_name, taxon_info)
+    
+    txt_path = save_regional_summaries(
+        resume,
+        scientific_name,
+        taxon_info)
 
 
     print("\n----- RESULTADO FINAL -----\n")
