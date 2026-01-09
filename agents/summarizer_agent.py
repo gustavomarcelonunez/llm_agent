@@ -3,7 +3,6 @@ import json
 from textwrap import shorten
 from openai import OpenAI
 
-# Inicializa cliente (usa tu variable de entorno OPENAI_API_KEY)
 client = OpenAI()
 
 # ==============================
