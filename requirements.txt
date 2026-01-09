@@ -1,3 +1,4 @@
+streamlit==1.52.2
 duckdb==1.4.1
 networkx==3.4.2
 openai==2.7.1

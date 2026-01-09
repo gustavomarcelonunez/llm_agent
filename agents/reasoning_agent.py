@@ -1,9 +1,15 @@
 from openai import OpenAI
 import os
+import streamlit as st
 from dotenv import load_dotenv
 
+api_key = (
+    st.secrets.get("OPENAI_API_KEY", None)
+    or os.getenv("OPENAI_API_KEY")
+)
+
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key)
 
 def summarize_obis_data(species_name, resumed_info):
     """

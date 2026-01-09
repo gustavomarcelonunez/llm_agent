@@ -10,9 +10,9 @@ from agents.regional_agent_runner import run_regional_agents
 from agents.reasoning_agent import summarize_obis_data
 from agents.summarizer_agent import summarize_with_llm
 
-LIMIT_PER_DATASET=500
-SAMPLE=20
-MAXWORKERS = 16
+LIMIT_PER_DATASET=200
+SAMPLE=10
+MAXWORKERS = 8
 
 if __name__ == "__main__":
 
