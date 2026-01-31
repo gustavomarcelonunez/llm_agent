@@ -6,6 +6,10 @@ import streamlit as st
 def render_occurrence_map(df):
     """Renderiza un mapa interactivo de ocurrencias con pydeck."""
     # Copia para no modificar el DF original
+    if df is None or df.empty:
+        st.info("No hay datos para mostrar en el mapa con los filtros seleccionados.")
+        return
+    
     df = df.copy()
 
     # --- Preprocesamiento ---

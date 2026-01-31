@@ -6,6 +6,7 @@ from aws_search.obis_duckdb import search_obis_species_parallel
 from utils.meow_ecoregions import assign_meow_ecoregion
 from utils.save_regional_summaries import save_regional_summaries
 from utils.save_final_summarie import append_global_summary_to_file
+from utils.get_optimal_workers import get_optimal_workers
 
 from agents.regional_agent_runner import run_regional_agents
 from agents.reasoning_agent import summarize_obis_data
@@ -15,8 +16,7 @@ from agents.summarizer_agent import summarize_with_llm
 def run_pipeline(
     scientific_name: str,
     limit_per_dataset: int = 200,
-    sample_size: int = 10,
-    max_workers: int = 8,
+    sample_size: int = 15,
     progress_cb=None,   # callback opcional para streamlit (mensajes)
 ) -> dict:
     """
@@ -27,8 +27,18 @@ def run_pipeline(
         if progress_cb:
             progress_cb(msg)
 
+    max_workers = get_optimal_workers()
+
     log("Verificando taxón en WoRMS...")
     taxon_info = worms_search(scientific_name)
+    if taxon_info.get("status") != "ok":
+        return {
+            "status": "error",
+            "stage": "worms",
+            "message": taxon_info.get("message", "Error desconocido en WoRMS."),
+            "taxon_info": taxon_info
+        }
+ 
     taxon_id = taxon_info["aphia_id"]
 
     log("Buscando datasets en OBIS...")

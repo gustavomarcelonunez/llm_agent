@@ -1,6 +1,6 @@
-# 🧠 Marine Species Reasoning Agent
+# 🧠 AquaMind: Marine Species Reasoning Agent
 
-**Marine Species Reasoning Agent** is an experimental project that integrates marine biodiversity data from **OBIS** (Ocean Biodiversity Information System) with taxonomic validation from **WoRMS** (World Register of Marine Species).  
+**AquaMind** is an experimental project that integrates marine biodiversity data from **OBIS** (Ocean Biodiversity Information System) with taxonomic validation from **WoRMS** (World Register of Marine Species).  
 It leverages **LLM-based agents** to process, validate, and summarize large occurrence datasets into scientifically meaningful insights.
 
 ## 🌊 Overview
@@ -67,9 +67,10 @@ outputs/ folder: a full integrated text file combining:
 ## 🧩 Main Components
 
     llm_agent/
-    ├── main.py                         # Entry point for the workflow
+    ├── main.py                         # Entry point for the workflow (CLI mode)
+    ├── app.py                          # Main file for streamlit app (Online mode)
     ├── agents/
-    |   ├── reasoning_agent.py          # Final reasoning LLM
+    │   ├── reasoning_agent.py          # Final reasoning LLM
     │   ├── regional_agent_runner.py    # Multithread-agent runner
     │   ├── summarizer_agent.py         # Multi-agent summarization
     ├── api_search/
@@ -79,11 +80,15 @@ outputs/ folder: a full integrated text file combining:
     │   ├── obis_duckdb.py              # Bucket S3 caller
     ├── data/                           # MEOW shapefiles
     ├── utils/
+    │   ├── get_optimal_workers.py      # Determines the optimal number of threads to run parallel processes.
+    │   ├── maps_utils.py               # Map generation process
     │   ├── meow_ecoregions.py          # MEOW ecoregion spatial join
     │   ├── save_regional_summaries.py  # Merge final summarie text output with regional summarie
     │   ├── save_regional_summaries.py  # Combined text output
-    ├── requirements.txt
-    ├── .env (not committed)
+    ├── requirements.txt                # Project dependencies
+    ├── .streamlit\
+    │   ├──secrets.toml                 # OpenAI API key for streamlit mode
+    ├── .env (not committed)            # OpenAI API key for CLI mode
     └── outputs/                        # Generated summaries
 
 ## 🧠 Architecture Overview
@@ -94,11 +99,11 @@ outputs/ folder: a full integrated text file combining:
         └──────┬────────┘
                ▼
         ┌───────────────┐
-        │ OBIS Query    │──► Download datasets data
+        │ WoRMS API     │──► Validate taxonomy
         └──────┬────────┘
                ▼
         ┌───────────────┐
-        │ WoRMS API     │──► Validate taxonomy
+        │ OBIS Query    │──► Download datasets IDs
         └──────┬────────┘
                ▼
         ┌──────────────────┐
@@ -123,6 +128,7 @@ outputs/ folder: a full integrated text file combining:
 - Uses duckdb for fast local querying of large CSV/Parquet data.
 - Designed for modular expansion (e.g., adding visualization or additional datasets).
 - Still under active development.
+- Online version is running at https://aquamind.streamlit.app/
 
 ## 🛡️ License
 MIT License — Free for research and educational use.
