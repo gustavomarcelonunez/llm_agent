@@ -50,7 +50,7 @@ with st.expander("Parámetros"):
     sample_size = st.number_input("Tamaño de muestra", 1, 1000, 15,
                                         help="Cantidad de datasets de OBIS aleatorios que se usarán para el análisis."
                                         )
-    max_workers = st.number_input("Max workers", 1, 64, 16,
+    max_workers = st.number_input("Hilos de ejecución", 1, 64, 16,
                                       help="Número de hilos/paralelización. A mayor número, más rápido, pero mayor consumo de CPU."
                                       )
 
