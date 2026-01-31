@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("AquaMind - Sistema Multiagente para el Análisis de Biodiversidad Marina")
+st.title("🌊 AquaMind - Exploración Inteligente de Biodiversidad Marina")
 
 scientific_name = st.text_input("Nombre científico", placeholder="Ej: Odontesthes smitti")
 
