@@ -69,4 +69,5 @@ def run_pipeline(
         "occurrences_count": int(len(df)) if df is not None else 0,
         "txt_path": txt_path,
         "global_summary": global_summary,
+        "df": df_with_ecoregion,
     }

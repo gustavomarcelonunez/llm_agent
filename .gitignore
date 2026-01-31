@@ -1,5 +1,6 @@
 # --- Archivos de entorno ---
 .env
+.streamlit/
 
 # --- Entorno virtual ---
 venv/
