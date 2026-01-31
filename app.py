@@ -8,7 +8,9 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🌊 AquaMind - Exploración Inteligente de Biodiversidad Marina")
+st.title("🌊 AquaMind")
+st.subheader("Exploración Inteligente de Biodiversidad Marina")
+
 
 scientific_name = st.text_input("Nombre científico", placeholder="Ej: Odontesthes smitti")
 
