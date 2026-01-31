@@ -14,7 +14,13 @@ def render_occurrence_map(df):
         "decimalLongitude": "lon",
     })
 
+    # Convertir a datetime
+    df["eventDate"] = pd.to_datetime(df["eventDate"], errors="coerce")
 
+    # Formatear solo donde hay fecha válida
+    df["eventDate"] = df["eventDate"].apply(
+        lambda x: x.strftime("%Y-%m-%d") if pd.notnull(x) else "Sin fecha"
+    )
 
 
     # Filtrar coordenadas válidas

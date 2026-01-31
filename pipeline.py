@@ -58,7 +58,11 @@ def run_pipeline(
     txt_path = save_regional_summaries(resume, scientific_name, taxon_info)
 
     log("Generando resumen global...")
-    global_summary = summarize_obis_data(scientific_name, txt_path)
+
+    with open(txt_path, "r", encoding="utf-8") as f:
+        resumed_info = f.read()
+
+    global_summary = summarize_obis_data(scientific_name, resumed_info)
     append_global_summary_to_file(txt_path, global_summary)
 
     return {
