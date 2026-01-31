@@ -45,7 +45,7 @@ scientific_name = st.text_input("Nombre científico", placeholder="Ej: Odontesth
 # Parámetros opcionales (para no tocar código cada vez)
 with st.expander("Parámetros"):
     limit_per_dataset = st.number_input("Límite por dataset", 1, 5000, 200,
-                                            help="Máximo de registros que se obtendrán de cada dataset antes de procesarlos."
+                                            help="Cantidad máxima de ocurrencias que se obtendrán de cada dataset antes de procesarlos."
                                             )
     sample_size = st.number_input("Tamaño de muestra", 1, 1000, 15,
                                         help="Cantidad de datasets de OBIS aleatorios que se usarán para el análisis."
