@@ -7,8 +7,37 @@ st.set_page_config(
     page_icon="🌊",  # Si querés usar un emoji
 )
 
-st.title("🌊 AquaMind")
-st.subheader("Exploración Inteligente de Biodiversidad Marina")
+st.markdown("""
+<style>
+.header-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0px 30px 0px;
+}
+.header-logo {
+    font-size: 60px;
+}
+.header-title {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: -5px;
+}
+.header-subtitle {
+    font-size: 20px;
+    color: #BBBBBB;
+}
+</style>
+
+<div class="header-container">
+    <div class="header-logo">🌊</div>
+    <div>
+        <div class="header-title">AquaMind</div>
+        <div class="header-subtitle">Exploración Inteligente de Biodiversidad Marina</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
 
 
 scientific_name = st.text_input("Nombre científico", placeholder="Ej: Odontesthes smitti")
