@@ -5,7 +5,6 @@ from utils.map_utils import render_occurrence_map
 st.set_page_config(
     page_title="AquaMind",
     page_icon="🌊",  # Si querés usar un emoji
-    layout="wide"
 )
 
 st.title("🌊 AquaMind")
