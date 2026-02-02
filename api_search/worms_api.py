@@ -35,7 +35,7 @@ def worms_search(scientific_name):
     record = data[0]
 
     aphia_id = record.get("AphiaID")
-    status = record.get("status", "unknown")  # accepted, unaccepted, synonym, etc.
+    status = record.get("status", "wn")  # accepted, unaccepted, synonym, etc.
     valid_name = record.get("valid_name") or record.get("scientificname")
     valid_aphia = record.get("valid_AphiaID") or aphia_id
 

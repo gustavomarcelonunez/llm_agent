@@ -27,6 +27,7 @@ def run_pipeline(
         if progress_cb:
             progress_cb(msg)
 
+    # Establece la cantidad de hilos de ejecución
     max_workers = get_optimal_workers()
 
     log("Verificando taxón en WoRMS...")

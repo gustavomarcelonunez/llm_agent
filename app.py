@@ -105,9 +105,6 @@ if "analysis_result" in st.session_state:
     #      FILTROS INTERACTIVOS
     # ================================
 
-    # --- Asegurar ecoregiones válidas ---
-    df_map["ecoregion"] = df_map["ecoregion"].fillna("Unknown")
-
     eco_counts = df_map["ecoregion"].value_counts().to_dict()   # {eco: count}
 
     options = ["Todas ({})".format(len(df_map))] + [

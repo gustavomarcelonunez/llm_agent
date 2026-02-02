@@ -35,7 +35,6 @@ def render_occurrence_map(df):
         return
 
     # --- Asignación de colores por ecoregión ---
-    df["ecoregion"] = df["ecoregion"].fillna("unknown")
     ecoregions = df["ecoregion"].unique()
 
     rng = np.random.default_rng(42)

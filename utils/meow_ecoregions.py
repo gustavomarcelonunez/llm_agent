@@ -8,7 +8,6 @@ def assign_meow_ecoregion(df: pd.DataFrame) -> pd.DataFrame:
 
     meow_path = "data/meow_ecos.shp"
 
-
     meow = gpd.read_file(meow_path)
     meow = meow.to_crs(epsg=4326)
 
@@ -24,12 +23,12 @@ def assign_meow_ecoregion(df: pd.DataFrame) -> pd.DataFrame:
 
     # Crear columna combinada jerárquica
     joined["ecoregion"] = (
-        joined["ECOREGION"].fillna("Unknown")
+        joined["ECOREGION"].fillna("No ecoregion")
     )
 
     # Para los sin coordenadas
     df_no_coords = df[df["decimalLatitude"].isna() | df["decimalLongitude"].isna()].copy()
-    df_no_coords["ecoregion"] = "Unknown / No coordinates"
+    df_no_coords["ecoregion"] = "No coordinates"
 
     # Combinar ambos
     df_final = pd.concat([joined.drop(columns="geometry"), df_no_coords], ignore_index=True)
