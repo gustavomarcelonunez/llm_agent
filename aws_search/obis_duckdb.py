@@ -10,6 +10,7 @@ GLOBAL_DUCKDB.execute("INSTALL httpfs;")
 
 # ----------------------------------------------------------
 # Función auxiliar: consulta un dataset individual en OBIS/S3
+# Esta se ejecuta en procesos separados.
 # ----------------------------------------------------------
 def query_obis_dataset(dataset_id: str, aphia_id: str, limit_per_dataset: int) -> pd.DataFrame:
     """Consulta un solo dataset parquet de OBIS en S3 y devuelve ocurrencias filtradas por especie."""
@@ -27,7 +28,7 @@ def query_obis_dataset(dataset_id: str, aphia_id: str, limit_per_dataset: int) -
                 interpreted.basisOfRecord AS basisOfRecord,
                 _occurrence_id AS occurrence_id
             FROM read_parquet('{s3_path}')
-            WHERE interpreted.aphiaid = {aphia_id}
+            WHERE interpreted.aphiaid = CAST({aphia_id} AS BIGINT)
             LIMIT {limit_per_dataset};
         """
         df = con.execute(query).fetchdf()
@@ -50,11 +51,8 @@ def query_obis_dataset(dataset_id: str, aphia_id: str, limit_per_dataset: int) -
 # ----------------------------------------------------------
 def search_obis_species_parallel(dataset_ids: List[str], aphia_id: int, limit_per_dataset: int, sample_size: int, max_workers: int) -> pd.DataFrame:
     """
-    Busca ocurrencias en múltiples datasets de OBIS en S3, en paralelo.
-    1️⃣ Toma una muestra de los datasets (por defecto 20)
-    2️⃣ Ejecuta consultas simultáneas a S3 (DuckDB + httpfs)
-    3️⃣ Devuelve un DataFrame consolidado
-
+    Busca ocurrencias en múltiples datasets OBIS usando paralelismo.
+    
     Args:
         dataset_ids (list[str]): lista de IDs de datasets OBIS
         aphia_id (int): identificar único de la especie
@@ -71,12 +69,12 @@ def search_obis_species_parallel(dataset_ids: List[str], aphia_id: int, limit_pe
     results = []
 
     # --- Paralelismo controlado ---
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {
             executor.submit(query_obis_dataset, ds_id, aphia_id, limit_per_dataset): ds_id
             for ds_id in dataset_ids
         }
-        for i, future in enumerate(concurrent.futures.as_completed(futures), 1):
+        for future in concurrent.futures.as_completed(futures):
             ds_id = futures[future]
             try:
                 df = future.result()
