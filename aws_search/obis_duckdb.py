@@ -8,6 +8,17 @@ from typing import List
 GLOBAL_DUCKDB = duckdb.connect()
 GLOBAL_DUCKDB.execute("INSTALL httpfs;")
 
+# ---- Parte global ----
+_process_con = None
+
+def init_duckdb_process():
+    global _process_con
+    _process_con = duckdb.connect()
+    _process_con.execute("LOAD httpfs;")
+    _process_con.execute("SET enable_object_cache = true;")
+
+
+
 # ----------------------------------------------------------
 # Función auxiliar: consulta un dataset individual en OBIS/S3
 # Esta se ejecuta en procesos separados.
@@ -16,8 +27,9 @@ def query_obis_dataset(dataset_id: str, aphia_id: str, limit_per_dataset: int) -
     """Consulta un solo dataset parquet de OBIS en S3 y devuelve ocurrencias filtradas por especie."""
     s3_path = f"s3://obis-open-data/occurrence/{dataset_id}.parquet"
     try:
-        con = duckdb.connect()
-        con.execute("LOAD httpfs;")
+
+        global _process_con
+        con = _process_con
 
         query = f"""
             SELECT
@@ -27,12 +39,11 @@ def query_obis_dataset(dataset_id: str, aphia_id: str, limit_per_dataset: int) -
                 interpreted.eventDate AS eventDate,
                 interpreted.basisOfRecord AS basisOfRecord,
                 _occurrence_id AS occurrence_id
-            FROM read_parquet('{s3_path}')
-            WHERE interpreted.aphiaid = CAST({aphia_id} AS BIGINT)
+            FROM read_parquet('{s3_path}', hive_partitioning = false)
+            WHERE interpreted.aphiaid = {aphia_id}
             LIMIT {limit_per_dataset};
         """
         df = con.execute(query).fetchdf()
-        con.close()
 
         if not df.empty:
             print(f"✅ {len(df)} registros encontrados en dataset:  https://obis.org/dataset/{dataset_id}")
@@ -69,7 +80,10 @@ def search_obis_species_parallel(dataset_ids: List[str], aphia_id: int, limit_pe
     results = []
 
     # --- Paralelismo controlado ---
-    with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+    with concurrent.futures.ProcessPoolExecutor(
+        max_workers=max_workers,
+        initializer=init_duckdb_process
+        ) as executor:
         futures = {
             executor.submit(query_obis_dataset, ds_id, aphia_id, limit_per_dataset): ds_id
             for ds_id in dataset_ids
@@ -82,7 +96,7 @@ def search_obis_species_parallel(dataset_ids: List[str], aphia_id: int, limit_pe
                     results.append(df)
             except Exception as e:
                 print(f"⚠️ Error procesando dataset {ds_id}: {e}")
-
+    
     # --- Consolidación final ---
     if not results:
         print("⚠️ No se encontraron ocurrencias en los datasets analizados.")
