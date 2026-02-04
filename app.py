@@ -57,6 +57,16 @@ with st.expander("Parámetros"):
 
 run = st.button("Analizar")
 
+with st.sidebar:
+    st.info("""
+    ### Acerca de esta aplicación
+    
+    Esta app permite buscar taxones en WoRMS y OBIS, procesar registros biológicos,
+    asignar ecorregiones y generar informes automáticos. Se basa en el uso de agentes IA, los cuales están 
+    programados para razonar sobre la información obtenida sobre una especie en particular.
+    """)
+
+
 # ---------------------------------------------------------
 # EJECUCIÓN DEL PIPELINE (solo cuando se presiona Analizar)
 # ---------------------------------------------------------
