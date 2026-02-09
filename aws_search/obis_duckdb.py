@@ -1,21 +1,24 @@
 import duckdb
 import pandas as pd
+import threading
 import concurrent.futures
 import random
-from typing import List
 
 
-GLOBAL_DUCKDB = duckdb.connect()
-GLOBAL_DUCKDB.execute("INSTALL httpfs;")
+import time
 
-# ---- Parte global ----
-_process_con = None
 
-def init_duckdb_process():
-    global _process_con
-    _process_con = duckdb.connect()
-    _process_con.execute("LOAD httpfs;")
-    _process_con.execute("SET enable_object_cache = true;")
+thread_local = threading.local()
+
+
+def get_con():
+    if not hasattr(thread_local, "con"):
+        con = duckdb.connect()
+        con.execute("LOAD httpfs;")
+        con.execute("SET enable_object_cache = true;")
+        con.execute("SET threads=8;")
+        thread_local.con = con
+    return thread_local.con
 
 
 
@@ -23,56 +26,38 @@ def init_duckdb_process():
 # Función auxiliar: consulta un dataset individual en OBIS/S3
 # Esta se ejecuta en procesos separados.
 # ----------------------------------------------------------
-def query_obis_dataset(dataset_id: str, aphia_id: str, limit_per_dataset: int) -> pd.DataFrame:
-    """Consulta un solo dataset parquet de OBIS en S3 y devuelve ocurrencias filtradas por especie."""
+def query_obis_dataset(dataset_id, aphia_id, limit_per_dataset):
+    con = get_con()
+
+    print("Antes de query")
     s3_path = f"s3://obis-open-data/occurrence/{dataset_id}.parquet"
-    try:
+    query = f"""
+        SELECT
+            interpreted.scientificName,
+            interpreted.decimalLatitude,
+            interpreted.decimalLongitude,
+            interpreted.eventDate,
+            interpreted.basisOfRecord,
+            _occurrence_id
+        FROM read_parquet('{s3_path}', hive_partitioning = false)
+        WHERE interpreted.aphiaid = {aphia_id}
+        LIMIT {limit_per_dataset}
+    """
 
-        global _process_con
-        con = _process_con
+    print("Ejecutando query…")
+    start = time.perf_counter()
 
-        query = f"""
-            SELECT
-                interpreted.scientificName AS scientificName,
-                interpreted.decimalLatitude AS decimalLatitude,
-                interpreted.decimalLongitude AS decimalLongitude,
-                interpreted.eventDate AS eventDate,
-                interpreted.basisOfRecord AS basisOfRecord,
-                _occurrence_id AS occurrence_id
-            FROM read_parquet('{s3_path}', hive_partitioning = false)
-            WHERE interpreted.aphiaid = {aphia_id}
-            LIMIT {limit_per_dataset};
-        """
-        df = con.execute(query).fetchdf()
+    df = con.execute(query).fetchdf()
 
-        if not df.empty:
-            print(f"✅ {len(df)} registros encontrados en dataset:  https://obis.org/dataset/{dataset_id}")
-        else:
-            print(f"— Sin registros para {dataset_id}")
+    elapsed = time.perf_counter() - start
+    print(f"Tiempo de ejecución: {elapsed:.3f} segundos")
 
-        return df
-
-    except Exception as e:
-        print(f"⚠️ Error en dataset {dataset_id}: {e}")
-        return pd.DataFrame()
-
+    return df
 
 # ----------------------------------------------------------
 # Función principal: busca en varios datasets (paralelizada)
 # ----------------------------------------------------------
-def search_obis_species_parallel(dataset_ids: List[str], aphia_id: int, limit_per_dataset: int, sample_size: int, max_workers: int) -> pd.DataFrame:
-    """
-    Busca ocurrencias en múltiples datasets OBIS usando paralelismo.
-    
-    Args:
-        dataset_ids (list[str]): lista de IDs de datasets OBIS
-        aphia_id (int): identificar único de la especie
-        limit_per_dataset (int): límite por dataset
-        sample_size (int): número máximo de datasets a consultar
-        max_workers (int): número de hilos paralelos
-    """
-
-    # --- Sampling ---
+def search_obis_species_parallel(dataset_ids, aphia_id, limit_per_dataset, sample_size, max_workers):
     if len(dataset_ids) > sample_size:
         dataset_ids = random.sample(dataset_ids, sample_size)
         print(f"🎯 Usando una muestra de {sample_size} datasets para optimizar el tiempo.")
@@ -80,22 +65,18 @@ def search_obis_species_parallel(dataset_ids: List[str], aphia_id: int, limit_pe
     results = []
 
     # --- Paralelismo controlado ---
-    with concurrent.futures.ProcessPoolExecutor(
-        max_workers=max_workers,
-        initializer=init_duckdb_process
-        ) as executor:
-        futures = {
-            executor.submit(query_obis_dataset, ds_id, aphia_id, limit_per_dataset): ds_id
-            for ds_id in dataset_ids
-        }
-        for future in concurrent.futures.as_completed(futures):
-            ds_id = futures[future]
-            try:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(query_obis_dataset, ds, aphia_id, limit_per_dataset): ds
+                    for ds in dataset_ids}
+
+            for future in concurrent.futures.as_completed(futures):
+                dataset_id = futures[future]
                 df = future.result()
                 if not df.empty:
+                    print(f"✅ {len(df)} registros encontrados en dataset: https://obis.org/dataset/{dataset_id}")
                     results.append(df)
-            except Exception as e:
-                print(f"⚠️ Error procesando dataset {ds_id}: {e}")
+                else:
+                    print(f"— Sin registros para dataset: {dataset_id}")
     
     # --- Consolidación final ---
     if not results:
