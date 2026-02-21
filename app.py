@@ -66,6 +66,19 @@ with st.sidebar:
     programados para razonar sobre la información obtenida sobre una especie en particular.
     """)
 
+    # Popup
+    @st.dialog("Aviso de responsabilidad")
+    def disclaimer_popup():
+        st.markdown("""
+        Esta aplicación utiliza modelos de lenguaje para analizar datos provenientes de WoRMS y OBIS.
+        Las respuestas generadas son orientativas y pueden contener errores. No deben considerarse asesoramiento
+        científico definitivo. Verifique la información con fuentes especializadas antes de tomar decisiones.
+        """)
+
+    if st.button("Disclaimer"):
+        disclaimer_popup()
+
+
 
 # ---------------------------------------------------------
 # EJECUCIÓN DEL PIPELINE (solo cuando se presiona Analizar)

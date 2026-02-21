@@ -29,7 +29,6 @@ def get_con():
 def query_obis_dataset(dataset_id, aphia_id, limit_per_dataset):
     con = get_con()
 
-    print("Antes de query")
     s3_path = f"s3://obis-open-data/occurrence/{dataset_id}.parquet"
     query = f"""
         SELECT
@@ -44,7 +43,6 @@ def query_obis_dataset(dataset_id, aphia_id, limit_per_dataset):
         LIMIT {limit_per_dataset}
     """
 
-    print("Ejecutando query…")
     start = time.perf_counter()
 
     df = con.execute(query).fetchdf()

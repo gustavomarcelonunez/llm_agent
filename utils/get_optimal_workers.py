@@ -9,4 +9,4 @@ def get_optimal_workers():
     workers = cores * 4
 
     # Límite superior razonable
-    return min(workers, 64)
+    return min(workers, 16)
