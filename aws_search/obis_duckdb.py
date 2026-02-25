@@ -14,6 +14,7 @@ thread_local = threading.local()
 def get_con():
     if not hasattr(thread_local, "con"):
         con = duckdb.connect()
+        con.execute("INSTALL httpfs;")
         con.execute("LOAD httpfs;")
         con.execute("SET enable_object_cache = true;")
         con.execute("SET threads=8;")
