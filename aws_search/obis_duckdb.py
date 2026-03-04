@@ -49,7 +49,7 @@ def query_obis_dataset(dataset_id, aphia_id, limit_per_dataset):
     df = con.execute(query).fetchdf()
 
     elapsed = time.perf_counter() - start
-    print(f"Tiempo de ejecución: {elapsed:.3f} segundos")
+    print(f"Execution time: {elapsed:.3f} seconds.")
 
     return df
 
@@ -59,7 +59,7 @@ def query_obis_dataset(dataset_id, aphia_id, limit_per_dataset):
 def search_obis_species_parallel(dataset_ids, aphia_id, limit_per_dataset, sample_size, max_workers):
     if len(dataset_ids) > sample_size:
         dataset_ids = random.sample(dataset_ids, sample_size)
-        print(f"🎯 Usando una muestra de {sample_size} datasets para optimizar el tiempo.")
+        print(f"🎯 Using a sample of {sample_size} datasets to optimize time.")
 
     results = []
 
@@ -72,17 +72,17 @@ def search_obis_species_parallel(dataset_ids, aphia_id, limit_per_dataset, sampl
                 dataset_id = futures[future]
                 df = future.result()
                 if not df.empty:
-                    print(f"✅ {len(df)} registros encontrados en dataset: https://obis.org/dataset/{dataset_id}")
+                    print(f"✅ {len(df)} records found in dataset: https://obis.org/dataset/{dataset_id}")
                     results.append(df)
                 else:
-                    print(f"— Sin registros para dataset: {dataset_id}")
+                    print(f"— No records for dataset: {dataset_id}")
     
     # --- Consolidación final ---
     if not results:
-        print("⚠️ No se encontraron ocurrencias en los datasets analizados.")
+        print("⚠️ No occurrences were found in the analyzed datasets.")
         return pd.DataFrame()
 
     df_final = pd.concat(results, ignore_index=True)
-    print(f"✅ Total de ocurrencias recuperadas: {len(df_final)}")
+    print(f"✅ Total number of recovered occurrences: {len(df_final)}")
     
     return df_final

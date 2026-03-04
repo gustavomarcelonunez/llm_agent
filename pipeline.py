@@ -30,7 +30,7 @@ def run_pipeline(
     # Establece la cantidad de hilos de ejecución
     max_workers = get_optimal_workers()
 
-    log("Verificando taxón en WoRMS...")
+    log("Checking taxon in WoRMS...")
     taxon_info = worms_search(scientific_name)
     if taxon_info.get("status") != "ok":
         return {
@@ -42,10 +42,10 @@ def run_pipeline(
  
     taxon_id = taxon_info["aphia_id"]
 
-    log("Buscando datasets en OBIS...")
+    log("Searching for datasets in OBIS...")
     datasets = obis_search(taxon_id)
 
-    log("Obteniendo ocurrencias desde S3 (OBIS)...")
+    log("Retrieving occurrences from S3 (OBIS)...")
     df = search_obis_species_parallel(
         dataset_ids=datasets,
         aphia_id=taxon_id,
@@ -54,10 +54,10 @@ def run_pipeline(
         max_workers=max_workers,
     )
 
-    log("Asignando ecorregiones MEOW...")
+    log("Assigning MEOW ecoregions...")
     df_with_ecoregion = assign_meow_ecoregion(df)
 
-    log("Generando resúmenes por ecorregión (LLM agents)...")
+    log("Generating summaries by ecoregion (LLM agents)...")
     resume = run_regional_agents(
         df_with_ecoregion,
         scientific_name,
@@ -65,10 +65,10 @@ def run_pipeline(
         max_workers=max_workers,
     )
 
-    log("Guardando resumen regional en TXT...")
+    log("Saving regional summary to TXT...")
     txt_path = save_regional_summaries(resume, scientific_name, taxon_info)
 
-    log("Generando resumen global...")
+    log("Generating a global summary...")
 
     with open(txt_path, "r", encoding="utf-8") as f:
         resumed_info = f.read()

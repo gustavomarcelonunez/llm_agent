@@ -4,7 +4,7 @@ from shapely.geometry import Point
 
 
 def assign_meow_ecoregion(df: pd.DataFrame) -> pd.DataFrame:
-    print("🌍 Asignando ecoregión MEOW...")
+    print("🌍 Assigning MEOW ecoregion...")
 
     meow_path = "data/meow_ecos.shp"
 
@@ -32,6 +32,6 @@ def assign_meow_ecoregion(df: pd.DataFrame) -> pd.DataFrame:
 
     # Combinar ambos
     df_final = pd.concat([joined.drop(columns="geometry"), df_no_coords], ignore_index=True)
-    print(f"✅ Asignadas {df_final['ecoregion'].nunique()}.")
+    print(f"✅ Assigned {df_final['ecoregion'].nunique()}.")
 
     return df_final

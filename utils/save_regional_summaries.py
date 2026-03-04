@@ -31,17 +31,17 @@ def save_regional_summaries(
 
     with open(output_path, "w", encoding="utf-8") as f:
         # Encabezado
-        f.write(f"📄 Reporte integrado para {species_name}\n")
+        f.write(f"📄 Integrated report for {species_name}\n")
         f.write("=" * 90 + "\n\n")
 
         # Sección WoRMS (si está disponible)
         if worms_info:
-            f.write("🔬 Información taxonómica (WoRMS)\n")
+            f.write("🔬 Taxonomic information (WoRMS)\n")
             f.write("-" * 90 + "\n")
             f.write(json.dumps(worms_info, ensure_ascii=False, indent=2) + "\n\n")
 
         # Sección de resúmenes regionales
-        f.write("🌎 Resúmenes regionales (OBIS)\n")
+        f.write("🌎 Regional summaries (OBIS)\n")
         f.write("=" * 90 + "\n\n")
 
         for region, summary in results.items():
@@ -49,5 +49,5 @@ def save_regional_summaries(
             f.write("-" * 90 + "\n")
             f.write(summary.strip() + "\n\n")
 
-    print(f"✅ Archivo combinado guardado en: {output_path}")
+    print(f"✅ Combined file saved in: {output_path}")
     return output_path

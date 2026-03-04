@@ -16,6 +16,6 @@ def obis_search(taxonid):
 
     results = [item["id"] for item in data.get("results", [])]
 
-    print(f"✅ Recuperados {len(results)} de {data.get('total', len(results))} datasets de OBIS.")
+    print(f"✅ Recovered {len(results)} de {data.get('total', len(results))} datasets from OBIS.")
 
     return results

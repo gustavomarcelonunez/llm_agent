@@ -36,7 +36,7 @@ def summarize_obis_data(species_name, resumed_info):
         - Si es necesario, da información acerca de cada ecoregión mencionada en el archivo.
         - Menciona toda información relevante acerca de su taxonomía.
         - Indica si hay posibles errores o inconsistencias.
-        - Redacta en español, con tono científico pero claro.
+        - Redacta siempre en inglés, con tono científico pero claro.
     """
 
     response = client.chat.completions.create(
@@ -46,7 +46,7 @@ def summarize_obis_data(species_name, resumed_info):
                 "role": "system",
                 "content": (
                     "Eres un oceanógrafo experto en análisis biogeográficos marinos y validación taxonómica. "
-                    "Comenta con precisión científica y estilo analítico."
+                    "Comenta siempre en inglés, con precisión científica y estilo analítico."
                 ),
             },
             {"role": "user", "content": prompt},

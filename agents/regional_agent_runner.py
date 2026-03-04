@@ -45,9 +45,9 @@ def run_regional_agents(df: pd.DataFrame, scientific_name: str, summarize_fn, ma
             try:
                 summary = future.result()
                 results[region] = summary
-                print(f"✅ Resumen completado: {region}")
+                print(f"✅ Summary completed: {region}")
             except Exception as e:
-                print(f"⚠️ Error procesando región {region}: {e}")
+                print(f"⚠️ Error processing region {region}: {e}")
                 results[region] = None
 
     return results

@@ -58,7 +58,7 @@ Analiza los siguientes datos de ocurrencias de **{species_name}** en la ecoregi�
 Registros (muestra): 
 {data_json}
 
-Por favor, entrega un resumen estructurado con los siguientes puntos:
+Por favor, entrega un resumen estructurado en idioma inglés con los siguientes puntos:
 1. Rango geográfico (latitud y longitud aproximada).
 2. Distribución temporal (años o períodos predominantes).
 3. Tipo de registro más común (por ejemplo, 'HumanObservation', 'PreservedSpecimen', etc.).

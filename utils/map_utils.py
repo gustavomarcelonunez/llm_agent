@@ -127,7 +127,7 @@ def render_occurrence_map(df):
     # ====== Capas ======
     layers = []
 
-    show_polygons = st.checkbox("Mostrar ecorregiones (MEOW)", value=False)
+    show_polygons = st.checkbox("Show ecoregiones (MEOW)", value=False)
 
     if show_polygons:
         layers.append(build_meow_layer(meow, color_map))

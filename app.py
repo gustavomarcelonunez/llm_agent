@@ -1,7 +1,35 @@
 import streamlit as st
-import pandas as pd
+import time
 from pipeline import run_pipeline
 from utils.map_utils import render_occurrence_map
+
+st.cache_data.clear()
+st.cache_resource.clear()
+
+# Evitar caché del navegador
+st.markdown(
+    """
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    """, 
+    unsafe_allow_html=True
+)
+
+# Invalidar assets cacheados
+cache_buster = int(time.time())
+st.markdown(f"""
+<script>
+fetch("/?cb={cache_buster}");
+if ('serviceWorker' in navigator) {{
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {{
+        for (let reg of registrations) {{
+            reg.unregister();
+        }}
+    }});
+}}
+</script>
+""", unsafe_allow_html=True)
 
 st.set_page_config(
     page_title="AquaMind",
@@ -37,7 +65,7 @@ st.markdown("""
     <div class="header-logo">🌊</div>
     <div>
         <div class="header-title">AquaMind</div>
-        <div class="header-subtitle">Exploración Inteligente de Biodiversidad Marina</div>
+        <div class="header-subtitle">Intelligent Exploration of Marine Biodiversity</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -45,34 +73,34 @@ st.markdown("""
 # ---------------------------------------------------------
 # INPUTS
 # ---------------------------------------------------------
-scientific_name = st.text_input("Nombre científico", placeholder="Ej: Odontesthes smitti")
+scientific_name = st.text_input("Scientific name", placeholder="Ej: Odontesthes smitti")
 
-with st.expander("Parámetros"):
-    limit_per_dataset = st.number_input("Límite por dataset", 1, 5000, 200,
-                                        help="Cantidad máxima de ocurrencias que se obtendrán de cada dataset antes de procesarlos. Rango: 1-5000"
+with st.expander("Settings"):
+    limit_per_dataset = st.number_input("Limit per dataset", 1, 5000, 200,
+                                        help="Maximum number of occurrences that will be retrieved from each dataset before processing. Range: 1-5000"
                                         )
-    sample_size = st.number_input("Tamaño de muestra", 1, 1000, 15,
-                                  help="Cantidad de datasets de OBIS aleatorios que se usarán para el análisis. Rango: 1-1000"
+    sample_size = st.number_input("Sample size", 1, 1000, 15,
+                                  help="Number of random OBIS datasets to be used for analysis. Range: 1-1000"
                                   )
 
-run = st.button("Analizar")
+run = st.button("Run")
 
 with st.sidebar:
     st.info("""
-    ### Acerca de esta aplicación
-    
-    Esta app permite buscar taxones en WoRMS y OBIS, procesar registros biológicos,
-    asignar ecorregiones y generar informes automáticos. Se basa en el uso de agentes IA, los cuales están 
-    programados para razonar sobre la información obtenida sobre una especie en particular.
+        ### About AquaMind
+                
+        This app lets you search taxa in WoRMS and OBIS, process biological records, assign ecoregions, and generate automatic reports.  
+        It uses AI agents to reason about species information, and relies on the OBIS Parquet data release for efficient access to occurrence records:  
+        [https://obis.org/2025/10/16/parquet-release/](https://obis.org/2025/10/16/parquet-release/)  
     """)
 
     # Popup
-    @st.dialog("Aviso de responsabilidad")
+    @st.dialog("Disclaimer")
     def disclaimer_popup():
         st.markdown("""
-        Esta aplicación utiliza modelos de lenguaje para analizar datos provenientes de WoRMS y OBIS.
-        Las respuestas generadas son orientativas y pueden contener errores. No deben considerarse asesoramiento
-        científico definitivo. Verifique la información con fuentes especializadas antes de tomar decisiones.
+            This application uses language models to analyze data from WoRMS and OBIS.
+            The generated responses are for guidance only and may contain errors. They should not be considered definitive scientific advice.
+            Verify the information with expert sources before making decisions.
         """)
 
     if st.button("Disclaimer"):
@@ -85,7 +113,7 @@ with st.sidebar:
 # ---------------------------------------------------------
 if run:
     if not scientific_name.strip():
-        st.error("Ingresá un nombre científico.")
+        st.error("Please enter a scientific name.")
         st.stop()
 
     log_box = st.empty()
@@ -93,7 +121,7 @@ if run:
     def progress_cb(msg: str):
         log_box.info(msg)
 
-    with st.spinner("Ejecutando análisis (puede tardar algunos minutos)..."):
+    with st.spinner("Running analysis (may take a few minutes)..."):
         result = run_pipeline(
             scientific_name=scientific_name.strip(),
             limit_per_dataset=int(limit_per_dataset),
@@ -115,12 +143,12 @@ if run:
 if "analysis_result" in st.session_state:
     result = st.session_state["analysis_result"]
 
-    st.success("Análisis completado")
+    st.success("Analysis completed")
 
-    st.subheader("Resumen global")
+    st.subheader("Global summary")
     st.write(result["global_summary"])
 
-    st.subheader("Mapa de ocurrencias")
+    st.subheader("Map of occurrences")
 
     df_map = result["df"].copy()
 
@@ -130,15 +158,15 @@ if "analysis_result" in st.session_state:
 
     eco_counts = df_map["ecoregion"].value_counts().to_dict()   # {eco: count}
 
-    options = ["Todas ({})".format(len(df_map))] + [
+    options = ["All ({})".format(len(df_map))] + [
         f"{eco} ({eco_counts[eco]})" for eco in sorted(eco_counts.keys())
     ]
 
-    selected = st.selectbox("Filtrar por ecorregión", options)
+    selected = st.selectbox("Filter by ecoregion", options)
 
     # --- Filtro por ecoregión ---
     # Extraer el nombre real de la ecoregión (sin el número)
-    if selected.startswith("Todas"):
+    if selected.startswith("All"):
         selected_ecoregion = None
     else:
         selected_ecoregion = selected.rsplit(" (", 1)[0]   # "North Patagonian Gulf"
@@ -155,10 +183,10 @@ if "analysis_result" in st.session_state:
 
 
 
-    st.subheader("Descargar reporte completo (TXT)")
+    st.subheader("Download full report (TXT)")
     with open(result["txt_path"], "rb") as f:
         st.download_button(
-            label="📥 Descargar resumen completo",
+            label="📥 Download full report",
             data=f,
             file_name=f"{result['scientific_name'].replace(' ', '_')}_report.txt",
             mime="text/plain",
