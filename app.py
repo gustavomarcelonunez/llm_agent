@@ -90,8 +90,8 @@ with st.sidebar:
         ### About AquaMind
                 
         This app lets you search taxa in WoRMS and OBIS, process biological records, assign ecoregions, and generate automatic reports.  
-        It uses AI agents to reason about species information, and relies on the OBIS Parquet data release for efficient access to occurrence records:  
-        [https://obis.org/2025/10/16/parquet-release/](https://obis.org/2025/10/16/parquet-release/)  
+        It uses AI agents to reason about species information, and relies on the [OBIS Parquet data release](https://obis.org/2025/10/16/parquet-release/) for efficient access to occurrence records. 
+        If you want to help us improve AquaMind, please fill in [this form](https://docs.google.com/forms/d/e/1FAIpQLScdGsUVgdHdfW24tvFsZSc2B8LqLQ0NtjlUYcP1YdGjSkhS-w/viewform?usp=publish-editor). It is anonymous and takes less than 3 minutes to complete. Thank you very much!
     """)
 
     # Popup
@@ -191,3 +191,54 @@ if "analysis_result" in st.session_state:
             file_name=f"{result['scientific_name'].replace(' ', '_')}_report.txt",
             mime="text/plain",
         )
+
+    # ---------------------------------------------------------
+    # CHATBOT ABOUT THE REPORT
+    # ---------------------------------------------------------
+
+    from agents.chat_agent import ChatAgent, ContextBuilder
+
+    st.subheader("Chat about this species")
+
+    # Inicializamos el agente (solo una vez)
+    if "chat_agent" not in st.session_state:
+        st.session_state["chat_agent"] = ChatAgent(
+            api_key=st.secrets["OPENAI_API_KEY"],  # si usas secrets
+            model="gpt-4o-mini"
+        )
+    agent = st.session_state["chat_agent"]
+
+    # Crear contexto estructurado
+    context_text = ContextBuilder.build(
+        df=df_map,            # <-- df sin filtro
+        summary_text=result["global_summary"],
+        species_name=result["scientific_name"]
+    )
+
+
+    # Historial del chat
+    if "chat_history" not in st.session_state:
+        st.session_state["chat_history"] = []
+
+    user_message = st.text_input(
+        "Ask something based on the analysis and data:"
+    )
+
+    send = st.button("Send message")
+    if send and user_message.strip():
+        assistant_message = agent.ask(
+            context_text=context_text,
+            chat_history=st.session_state["chat_history"],
+            user_message=user_message
+        )
+
+        # Save history
+        st.session_state["chat_history"].append({"role": "user", "content": user_message})
+        st.session_state["chat_history"].append({"role": "assistant", "content": assistant_message})
+
+    # Display messages
+    for msg in st.session_state["chat_history"]:
+        if msg["role"] == "user":
+            st.markdown(f"**You:** {msg['content']}")
+        else:
+            st.markdown(f"**AquaMind AI:** {msg['content']}")
