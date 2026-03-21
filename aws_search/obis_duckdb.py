@@ -14,10 +14,16 @@ thread_local = threading.local()
 def get_con():
     if not hasattr(thread_local, "con"):
         con = duckdb.connect()
-        con.execute("INSTALL httpfs;")
-        con.execute("LOAD httpfs;")
+
+        # NO INSTALL (Streamlit Cloud does not allow installing extensions)
+        try:
+            con.execute("LOAD httpfs;")
+        except Exception as e:
+            print("Warning: Could not load httpfs extension:", e)
+
         con.execute("SET enable_object_cache = true;")
         con.execute("SET threads=8;")
+        
         thread_local.con = con
     return thread_local.con
 
