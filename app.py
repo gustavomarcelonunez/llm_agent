@@ -116,6 +116,9 @@ if run:
         st.error("Please enter a scientific name.")
         st.stop()
 
+    st.session_state.pop("chat_agent", None)
+    st.session_state.pop("chat_history", None)
+
     log_box = st.empty()
 
     def progress_cb(msg: str):
