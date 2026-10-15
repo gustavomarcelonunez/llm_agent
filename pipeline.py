@@ -28,7 +28,7 @@ def run_pipeline(
             progress_cb(msg)
 
     # Establece la cantidad de hilos de ejecución
-    max_workers = get_optimal_workers()
+    max_workers = 3
 
     log("Checking taxon in WoRMS...")
     taxon_info = worms_search(scientific_name)
