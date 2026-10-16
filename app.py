@@ -1,5 +1,10 @@
 import streamlit as st
 import time
+import html
+
+from pipeline import run_pipeline, PIPELINE_STAGES
+from utils.map_utils import render_occurrence_map
+
 from pipeline import run_pipeline
 from utils.map_utils import render_occurrence_map
 
@@ -82,17 +87,165 @@ with st.expander("Settings"):
     sample_size = st.number_input("Sample size", 1, 1000, 15,
                                   help="Number of random OBIS datasets to be used for analysis. Range: 1-1000"
                                   )
+# Estado del progreso, persistente entre reruns de Streamlit.
+if "analysis_progress" not in st.session_state:
+    st.session_state["analysis_progress"] = {
+        stage: {
+            "status": "pending",
+            "duration": None,
+        }
+        for stage in PIPELINE_STAGES
+    }
+
+def render_progress(progress_box, progress_bar_box):
+    progress_state = st.session_state["analysis_progress"]
+
+    completed = sum(
+        1
+        for stage in PIPELINE_STAGES
+        if progress_state[stage]["status"] == "complete"
+    )
+    failed = any(
+        progress_state[stage]["status"] == "error"
+        for stage in PIPELINE_STAGES
+    )
+
+    with progress_bar_box.container():
+        st.progress(
+            completed / len(PIPELINE_STAGES),
+            text=f"{completed} of {len(PIPELINE_STAGES)} stages completed",
+        )
+
+    with progress_box.container():
+        
+
+        rows = []
+
+        for stage in PIPELINE_STAGES:
+            item = progress_state[stage]
+            status = item["status"]
+            duration = item["duration"]
+
+            safe_stage = html.escape(stage)
+
+            if status == "complete":
+                icon = "✓"
+                detail = f"{duration:.2f} s" if duration is not None else "Done"
+                css_class = "complete"
+
+            elif status == "running":
+                icon = '<span class="am-spinner"></span>'
+                detail = "In progress"
+                css_class = "running"
+
+            elif status == "error":
+                icon = "✕"
+                detail = f"Failed · {duration:.2f} s" if duration is not None else "Failed"
+                css_class = "error"
+
+            else:
+                icon = "○"
+                detail = "Pending"
+                css_class = "pending"
+
+            rows.append(
+                f"""
+                <div class="am-progress-row {css_class}">
+                    <span class="am-progress-icon">{icon}</span>
+                    <span class="am-progress-stage">{safe_stage}</span>
+                    <span class="am-progress-detail">{detail}</span>
+                </div>
+                """
+            )
+
+
+        st.markdown(
+            """
+            <style>
+            .am-progress-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 9px 2px;
+                border-bottom: 1px solid rgba(128, 128, 128, 0.18);
+                font-size: 0.92rem;
+            }
+            .am-progress-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 20px;
+                font-weight: 600;
+            }
+            .am-progress-stage {
+                flex: 1;
+            }
+            .am-progress-detail {
+                font-size: 0.8rem;
+                opacity: 0.7;
+                white-space: nowrap;
+            }
+            .am-progress-row.complete .am-progress-icon {
+                color: #2e9d62;
+            }
+            .am-progress-row.error .am-progress-icon {
+                color: #dc4545;
+            }
+            .am-spinner {
+                display: inline-block;
+                width: 13px;
+                height: 13px;
+                border: 2px solid rgba(128, 128, 128, 0.3);
+                border-top-color: #2e9d62;
+                border-radius: 50%;
+                animation: am-spin 0.8s linear infinite;
+            }
+            @keyframes am-spin {
+                to { transform: rotate(360deg); }
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            "\n".join(rows),
+            unsafe_allow_html=True,
+        )
+
+
+progress_bar_box = st.empty()
+
+with st.expander("Analysis progress", expanded=True):
+    progress_box = st.empty()
+    
+render_progress(progress_box, progress_bar_box)
 
 run = st.button("Run")
 
 with st.sidebar:
-    st.info("""
-        ### About AquaMind
-                
-        This app lets you search taxa in WoRMS and OBIS, process biological records, assign ecoregions, and generate automatic reports.  
-        It uses AI agents to reason about species information, and relies on the [OBIS Parquet data release](https://obis.org/2025/10/16/parquet-release/) for efficient access to occurrence records. 
-        If you want to help us improve AquaMind, please fill in [this form](https://docs.google.com/forms/d/e/1FAIpQLScdGsUVgdHdfW24tvFsZSc2B8LqLQ0NtjlUYcP1YdGjSkhS-w/viewform?usp=publish-editor). It is anonymous and takes less than 3 minutes to complete. Thank you very much!
-    """)
+    @st.dialog("About AquaMind")
+    def show_about():
+        st.markdown("""
+        This app lets you search taxa in WoRMS and OBIS,
+        process biological records, assign ecoregions,
+        and generate automatic reports.
+
+        It uses AI agents to reason about species information
+        and relies on the [OBIS Parquet data release](
+        https://obis.org/2025/10/16/parquet-release/
+        ) for efficient access to occurrence records.
+
+        You can also chat with the data using the built-in AI assistant to explore results and ask questions about the retrieved biological records.
+
+        If you want to help us improve AquaMind, please fill in
+        [this anonymous feedback form](
+        https://docs.google.com/forms/d/e/1FAIpQLScdGsUVgdHdfW24tvFsZSc2B8LqLQ0NtjlUYcP1YdGjSkhS-w/viewform?usp=publish-editor
+        ). It takes less than 3 minutes. Thank you!
+        """)
+
+    if st.button("ⓘ About AquaMind"):
+        show_about()
 
     # Popup
     @st.dialog("Disclaimer")
@@ -121,16 +274,50 @@ if run:
 
     log_box = st.empty()
 
-    def progress_cb(msg: str):
-        log_box.info(msg)
+    # Reiniciar el progreso para una nueva ejecución.
+    st.session_state["analysis_progress"] = {
+        stage: {
+            "status": "pending",
+            "duration": None,
+        }
+        for stage in PIPELINE_STAGES
+    }
 
-    with st.spinner("Running analysis (may take a few minutes)..."):
-        result = run_pipeline(
-            scientific_name=scientific_name.strip(),
-            limit_per_dataset=int(limit_per_dataset),
-            sample_size=int(sample_size),
-            progress_cb=progress_cb,
-        )
+    render_progress(progress_box, progress_bar_box)
+
+    def progress_cb(event: dict):
+        stage = event["stage"]
+
+        if stage not in st.session_state["analysis_progress"]:
+            return
+
+        st.session_state["analysis_progress"][stage].update({
+            "status": event["status"],
+            "duration": event.get("duration"),
+        })
+
+        render_progress(progress_box, progress_bar_box)
+
+    try:
+        with st.spinner("Running analysis..."):
+            result = run_pipeline(
+                scientific_name=scientific_name.strip(),
+                limit_per_dataset=int(limit_per_dataset),
+                sample_size=int(sample_size),
+                progress_cb=progress_cb,
+            )
+
+    except Exception as exc:
+        st.error(f"Analysis failed: {exc}")
+        st.stop()
+
+    # Error devuelto por la validación de WoRMS.
+    if result.get("status") == "error":
+        st.error(f"❌ {result['message']}")
+        st.stop()
+
+    st.session_state["analysis_result"] = result
+
 
     # Si hubo error al buscar el taxón
     if result.get("status") == "error":
@@ -211,12 +398,17 @@ if "analysis_result" in st.session_state:
         )
     agent = st.session_state["chat_agent"]
 
-    # Crear contexto estructurado
+    # Leer el informe completo como contexto para el chatbot.
+    with open(result["txt_path"], "r", encoding="utf-8") as f:
+        full_report = f.read()
+
+    # Crear contexto estructurado con estadísticas y el informe completo.
     context_text = ContextBuilder.build(
-        df=df_map,            # <-- df sin filtro
-        summary_text=result["global_summary"],
+        df=df_map,
+        summary_text=full_report,
         species_name=result["scientific_name"]
     )
+
 
 
     # Historial del chat
